@@ -1,0 +1,68 @@
+#ifndef LINKEDLIST_LISTSTACK_H
+#define LINKEDLIST_LISTSTACK_H
+
+#include <iostream>
+#include <optional>
+
+template<typename T>
+class Node{
+public:
+    T data;
+    Node* next;
+    Node(const T& newData)
+    : data{newData} ,next{nullptr}{}
+};
+
+template<typename T>
+class Stack{
+private:
+    Node<T>* topNode;
+
+public:
+    Stack()
+        : topNode{nullptr}{}
+    ~Stack();
+
+    void push(const T& newData);
+    std::optional<T> pop();
+    bool isEmpty() const;
+};
+
+template<typename T>
+Stack<T>::~Stack(){
+    while (topNode){
+        Node<T>* temp = topNode;
+        topNode = topNode->next;
+        delete temp;
+        temp = nullptr;
+    }
+}
+
+template<typename T>
+void Stack<T>::push(const T& newData){
+    Node<T>* newNode = new Node<T>(newData);
+    newNode->next = topNode;
+    topNode = newNode;
+    newNode = nullptr;
+}
+
+template<typename T>
+std::optional<T> Stack<T>::pop(){
+    if (isEmpty()){
+        std::cout<<"Stack is empty."<<std::endl;
+        return std::nullopt;
+    }
+    Node<T>* temp = topNode;
+    T poppedValue = temp->data;
+    topNode = topNode->next;
+    delete temp;
+    temp = nullptr;
+    return poppedValue;
+}
+
+template<typename T>
+bool Stack<T>::isEmpty() const{
+    return topNode == nullptr;
+}
+
+#endif //LINKEDLIST_LISTSTACK_H
