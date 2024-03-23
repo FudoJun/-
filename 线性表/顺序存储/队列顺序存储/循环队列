@@ -1,0 +1,67 @@
+
+#ifndef LINKEDLIST_CIRCULARQUEUE_H
+#define LINKEDLIST_CIRCULARQUEUE_H
+
+#include <iostream>
+#include <optional>
+
+template<typename T>
+class CircularQueue{
+private:
+    T* data;
+    int front;
+    int rear;
+    int capacity;
+
+public:
+    CircularQueue(int size = 8)
+        : front{0},rear{0},capacity{size}
+    {
+            data = new T[capacity];
+    }
+
+    ~CircularQueue()
+    {
+        delete[] data;
+    }
+
+    bool isEmpty() const;
+    bool isFull() const;
+    void enqueue(const T& value);
+    std::optional<T> dequeue();
+
+};
+
+template<typename T>
+bool CircularQueue<T>::isEmpty() const {
+    return front == rear;
+}
+
+template<typename T>
+bool CircularQueue<T>::isFull() const {
+    return ((rear + 1) & (capacity - 1)) == front;  //使用按位与计算取模，可更高效
+}
+
+template<typename T>
+void CircularQueue<T>::enqueue(const T& value) {
+    if (isFull()){
+        std::cout<<"Queue is full."<<std::endl;
+        return;
+    }
+    data[rear] = value;
+    rear = (rear + 1) & (capacity - 1);
+    return;
+}
+
+template<typename T>
+std::optional<T> CircularQueue<T>::dequeue() {
+    if (isEmpty()){
+        std::cout<<"Queue is empty."<<std::endl;
+        return std::nullopt;
+    }
+    T value = data[front];
+    front = (front + 1) & (capacity - 1);
+    return value;
+}
+
+#endif //LINKEDLIST_CIRCULARQUEUE_H
