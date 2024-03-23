@@ -1,6 +1,4 @@
 
-#ifndef LINKEDLIST_CIRCULARQUEUE_H
-#define LINKEDLIST_CIRCULARQUEUE_H
 
 #include <iostream>
 #include <optional>
@@ -64,4 +62,4 @@ std::optional<T> CircularQueue<T>::dequeue() {
     return value;
 }
 
-#endif //LINKEDLIST_CIRCULARQUEUE_H
+
