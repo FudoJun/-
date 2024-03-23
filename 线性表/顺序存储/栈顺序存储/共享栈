@@ -1,0 +1,131 @@
+#ifndef SHAREDSTACK_H
+#define SHAREDSTACK_H
+
+#include <iostream>
+#include <optional>
+
+template<typename T>
+class SharedStack{
+private:
+    T* data;
+    int capacity;
+    int top1;   //栈1的栈顶指针
+    int top2;   //栈2的栈顶指针
+
+public:
+    SharedStack(int initCapacity = 4);
+    ~SharedStack();
+
+    bool isEmpty1() const;
+    bool isEmpty2() const;
+
+    void resize();
+
+    void push1(const T& value);
+    void push2(const T& value);
+
+    std::optional<T> pop1();    //出栈栈顶元素
+    std::optional<T> pop2();
+    std::optional<T> findTop1() const;  //查找栈顶元素
+    std::optional<T> findTop2() const;
+
+};
+
+template<typename T>
+SharedStack<T>::SharedStack(int initCapacity)
+    : capacity{initCapacity},top1{-1},top2{initCapacity}
+{
+    data = new T[capacity];
+}
+
+template<typename T>
+SharedStack<T>::~SharedStack() {
+    delete[] data;
+}
+
+template<typename T>
+bool SharedStack<T>::isEmpty1() const {
+    return top1 == -1;
+}
+
+template<typename T>
+bool SharedStack<T>::isEmpty2() const {
+    return top2 == capacity;
+}
+
+template<typename T>
+void SharedStack<T>::resize() {
+    int newCapacity = capacity * 2;
+    T* newData = new T[newCapacity];
+    for (int i = 0; i <= top1; ++i) {
+        newData[i] = std::move(data[i]);
+    }
+
+    int j = newCapacity-1;  //从栈2最右边开始装
+    for (int i = capacity-1; i >= top2 ; i--) {
+        newData[j--] = std::move(data[i]);
+    }
+    delete[] data;
+    data = newData;
+    newData = nullptr;
+    top2 = newCapacity - (capacity - top2); //栈2的栈顶元素下标
+    capacity = newCapacity;
+}
+
+template<typename T>
+void SharedStack<T>::push1(const T &value) {
+    if (top1+1 < top2){
+        data[++top1] = value;
+    } else{
+        resize();
+        data[++top1] = value;
+    }
+}
+
+template<typename T>
+void SharedStack<T>::push2(const T &value) {
+    if (top2-1 > top1){
+        data[--top2] = value;
+    } else{
+        resize();
+        data[--top2] = value;
+    }
+}
+
+template<typename T>
+std::optional<T> SharedStack<T>::findTop1() const {
+    if (isEmpty1()){
+        std::cout<<"Stack is empty! Cannot find top element."<<std::endl;
+        return std::nullopt;
+    }
+    return data[top1];
+}
+
+template<typename T>
+std::optional<T> SharedStack<T>::findTop2() const {
+    if (isEmpty2()){
+        std::cout<<"Stack is empty! Cannot find top element."<<std::endl;
+        return std::nullopt;
+    }
+    return data[top2];
+}
+
+template<typename T>
+std::optional<T> SharedStack<T>::pop1() {
+    if (findTop1().has_value()){
+        return data[top1--];
+    } else{
+        return std::nullopt;
+    }
+}
+
+template<typename T>
+std::optional<T> SharedStack<T>::pop2() {
+    if (findTop2().has_value()){
+        return data[top2++];
+    } else{
+        return std::nullopt;
+    }
+}
+
+#endif
