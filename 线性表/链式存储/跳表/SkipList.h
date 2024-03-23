@@ -1,6 +1,4 @@
 
-#ifndef LINKEDLIST_SKIPLIST_H
-#define LINKEDLIST_SKIPLIST_H
 
 #include <iostream>
 #include <vector>
@@ -153,4 +151,4 @@ void SkipList<K,V>::printSkipList()
     }
 }
 
-#endif //LINKEDLIST_SKIPLIST_H
+
