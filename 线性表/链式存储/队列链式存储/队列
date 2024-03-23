@@ -1,0 +1,77 @@
+
+
+#include <iostream>
+#include <optional>
+
+template<typename T>
+class Node{
+public:
+    T data;
+    Node* next;
+
+    Node(const T& newData)
+        : data{newData}, next{nullptr}{}
+};
+
+template<typename T>
+class Queue{
+private:
+    Node<T>* front;
+    Node<T>* rear;
+
+public:
+    Queue()
+        : front{nullptr}, rear{nullptr} {}
+
+    ~Queue();
+
+    bool isEmpty() const;
+    void enqueue(const T& newData);
+    std::optional<T> dequeque();
+
+};
+
+template<typename T>
+Queue<T>::~Queue() {
+    while (front != nullptr){
+        Node<T>* temp = front;
+        front = front->next;
+        delete temp;
+        temp = nullptr;
+    }
+}
+
+template<typename T>
+bool Queue<T>::isEmpty() const {
+    return front == nullptr;
+}
+
+template<typename T>
+void Queue<T>::enqueue(const T &newData) {
+    Node<T>* newNode = new Node<T>(newData);
+    if (isEmpty()){
+        front = rear = newNode;
+        newNode = nullptr;
+        return;
+    }
+    newNode->next = nullptr;
+    rear->next = newNode;
+    rear = newNode;
+    newNode = nullptr;
+}
+
+template<typename T>
+std::optional<T> Queue<T>::dequeque() {
+    if (isEmpty()){
+        std::cout<<"Queue is empty."<<std::endl;
+        return std::nullopt;
+    }
+    T value = front->data;
+    Node<T>* temp = front;
+    front = front->next;
+    delete temp;
+    temp = nullptr;
+    return value;
+}
+
+
