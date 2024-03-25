@@ -1,0 +1,64 @@
+
+#include <iostream>
+
+template<typename T>
+class BinaryTreeNode{
+public:
+    T data;
+    BinaryTreeNode* left;
+    BinaryTreeNode* right;
+
+    BinaryTreeNode(const T& newData)
+        : data{newData}, left{nullptr}, right{nullptr} {}
+};
+
+template<typename T>
+class BinaryTree{
+private:
+    BinaryTreeNode<T>* root;
+    //辅助函数
+    BinaryTreeNode<T>* insertHelper(BinaryTreeNode<T>* node, const T& value);
+    void preOrderHelper(BinaryTreeNode<T>* node) const;
+
+public:
+    BinaryTree() : root{nullptr} {}
+    //对外接口
+    void insert(const T& value);
+    void preOrder() const;
+};
+
+template<typename T>
+void BinaryTree<T>::insert(const T &value) {
+    root = insertHelper(root, value);
+}
+
+template<typename T>
+BinaryTreeNode<T> *BinaryTree<T>::insertHelper(BinaryTreeNode<T> *node, const T &value) {
+    if (node == nullptr){
+        return new BinaryTreeNode<T>(value);
+    }
+    //小的在左，大的在右，根节点大于所有它的左子树的节点，小于它的所有右子树的节点
+    if (value < node->data){
+        node->left = insertHelper(node->left, value);
+    } else if (value > node->data){
+        node->right = insertHelper(node->right, value);
+    }
+    return node;
+}
+
+template<typename T>
+void BinaryTree<T>::preOrder() const {
+    std::cout<<"Preorder Traversal: ";
+    preOrderHelper(root);
+    std::cout<<std::endl;
+}
+
+template<typename T>
+void BinaryTree<T>::preOrderHelper(BinaryTreeNode<T> *node) const {
+    if (node != nullptr){
+        std::cout<<node->data<<" ";
+        preOrderHelper(node->left);
+        preOrderHelper(node->right);
+    }
+}
+
