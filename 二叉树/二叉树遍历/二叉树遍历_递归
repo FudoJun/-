@@ -19,12 +19,16 @@ private:
     //辅助函数
     BinaryTreeNode<T>* insertHelper(BinaryTreeNode<T>* node, const T& value);
     void preOrderHelper(BinaryTreeNode<T>* node) const;
+    void inOrderHelper(BinaryTreeNode<T>* node) const;
+    void postOrderHelper(BinaryTreeNode<T>* node) const;
 
 public:
     BinaryTree() : root{nullptr} {}
     //对外接口
     void insert(const T& value);
     void preOrder() const;
+    void inOrder() const;
+    void postOrder() const;
 };
 
 template<typename T>
@@ -54,11 +58,44 @@ void BinaryTree<T>::preOrder() const {
 }
 
 template<typename T>
-void BinaryTree<T>::preOrderHelper(BinaryTreeNode<T> *node) const {
+void BinaryTree<T>::preOrderHelper(BinaryTreeNode<T> *node) const { //前序遍历先打印根节点，在进入左节点
     if (node != nullptr){
         std::cout<<node->data<<" ";
         preOrderHelper(node->left);
         preOrderHelper(node->right);
     }
 }
+
+template<typename T>
+void BinaryTree<T>::inOrder() const {
+    std::cout<<"Inorder Traversal: ";
+    inOrderHelper(root);
+    std::cout<<std::endl;
+}
+
+template<typename T>
+void BinaryTree<T>::inOrderHelper(BinaryTreeNode<T> *node) const {  //中序遍历先进入左节点，再打印根节点
+    if (node != nullptr){
+        inOrderHelper(node->left);
+        std::cout<<node->data<<" ";
+        inOrderHelper(node->right);
+    }
+}
+
+template<typename T>
+void BinaryTree<T>::postOrder() const {
+    std::cout<<"Postorder Traversal: ";
+    postOrderHelper(root);
+    std::cout<<std::endl;
+}
+
+template<typename T>
+void BinaryTree<T>::postOrderHelper(BinaryTreeNode<T> *node) const {    //后续遍历先遍历左右子树，再打印根节点    
+    if (node != nullptr){
+        postOrderHelper(node->left);
+        postOrderHelper(node->right);
+        std::cout<<node->data<<" ";
+    }
+}
+
 
