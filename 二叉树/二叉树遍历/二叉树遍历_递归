@@ -1,5 +1,6 @@
 
 #include <iostream>
+#include "Queue.h"
 
 template<typename T>
 class BinaryTreeNode{
@@ -21,6 +22,7 @@ private:
     void preOrderHelper(BinaryTreeNode<T>* node) const;
     void inOrderHelper(BinaryTreeNode<T>* node) const;
     void postOrderHelper(BinaryTreeNode<T>* node) const;
+    void levelOrderHelper(BinaryTreeNode<T>* node) const;
 
 public:
     BinaryTree() : root{nullptr} {}
@@ -29,6 +31,7 @@ public:
     void preOrder() const;
     void inOrder() const;
     void postOrder() const;
+    void levelOrder() const;
 };
 
 template<typename T>
@@ -90,11 +93,41 @@ void BinaryTree<T>::postOrder() const {
 }
 
 template<typename T>
-void BinaryTree<T>::postOrderHelper(BinaryTreeNode<T> *node) const {    //后续遍历先遍历左右子树，再打印根节点    
+void BinaryTree<T>::postOrderHelper(BinaryTreeNode<T> *node) const {    //后续遍历先遍历左右子树，再打印根节点
     if (node != nullptr){
         postOrderHelper(node->left);
         postOrderHelper(node->right);
         std::cout<<node->data<<" ";
+    }
+}
+
+template<typename T>
+void BinaryTree<T>::levelOrder() const {
+    std::cout<<"Level order Traversal: ";
+    levelOrderHelper(root);
+    std::cout<<std::endl;
+}
+
+template<typename T>
+void BinaryTree<T>::levelOrderHelper(BinaryTreeNode<T>* node) const {   //层序遍历使用队列实现，先入队根节点，再入队左右子树，再依次出队
+    if (node == nullptr){
+        return;
+    }
+    Queue<BinaryTreeNode<T>*> queue;
+    queue.enqueue(node);
+
+    while (!queue.isEmpty()){   //判断队列不为空
+        auto currentNode = queue.dequeque();
+        if (currentNode.has_value()){
+            std::cout<<currentNode.value()->data<<" ";
+
+            if (currentNode.value()->left != nullptr){
+                queue.enqueue(currentNode.value()->left);
+            }
+            if (currentNode.value()->right != nullptr){
+                queue.enqueue(currentNode.value()->right);
+            }
+        }
     }
 }
 
