@@ -1,4 +1,5 @@
 
+
 #include <iostream>
 #include "Queue.h"
 
@@ -23,6 +24,9 @@ private:
     void inOrderHelper(BinaryTreeNode<T>* node) const;
     void postOrderHelper(BinaryTreeNode<T>* node) const;
     void levelOrderHelper(BinaryTreeNode<T>* node) const;
+    std::optional<T> findHelper(BinaryTreeNode<T>* node, const T& value) const;
+    T findMaxHelper(BinaryTreeNode<T>* node) const;
+    BinaryTreeNode<T>* deleteNodeHelper(BinaryTreeNode<T>* node, const T& value);
 
 public:
     BinaryTree() : root{nullptr} {}
@@ -32,6 +36,9 @@ public:
     void inOrder() const;
     void postOrder() const;
     void levelOrder() const;
+    std::optional<T> find(const T& value) const;
+    T findMax() const;
+    BinaryTreeNode<T>* deleteNode(const T& value);
 };
 
 template<typename T>
@@ -129,6 +136,91 @@ void BinaryTree<T>::levelOrderHelper(BinaryTreeNode<T>* node) const {   //层序
             }
         }
     }
+}
+
+template<typename T>
+std::optional<T> BinaryTree<T>::find(const T& value) const {
+    return findHelper(root, value);
+}
+
+template<typename T>    //使用二叉查找树查找元素时，小于根节点往左，大于往右，如果找到底层都没有，则元素不在树中
+std::optional<T> BinaryTree<T>::findHelper(BinaryTreeNode<T> *node, const T &value) const {
+    /* if (node == nullptr){
+       return std::nullopt;
+   }
+
+    if (value == node->data){
+       return node->data;
+   }
+   if (value < node->data){
+       return findHelper(node->left, value);
+   }
+   if (value > node->data){
+       return findHelper(node->right, value);
+   }*/ //递归实现
+
+    //非递归实现
+    while (node){
+        if (value == node->data){
+            return value;
+        } else if (value < node->data){
+            node = node->left;
+        } else{
+            node = node->right;
+        }
+    }
+    return std::nullopt;
+}
+
+template<typename T>
+T BinaryTree<T>::findMax() const {
+    findMaxHelper(root);
+}
+
+template<typename T>
+T BinaryTree<T>::findMaxHelper(BinaryTreeNode<T> *node) const {
+    if (node == nullptr){
+        return NULL;
+    }
+    while (node->right){
+        node = node->right;
+    }
+    return node->data;
+}
+
+template<typename T>
+BinaryTreeNode<T> *BinaryTree<T>::deleteNode(const T &value) {
+    return deleteNodeHelper(root, value);
+}
+
+template<typename T>
+BinaryTreeNode<T> *BinaryTree<T>::deleteNodeHelper(BinaryTreeNode<T> *node, const T &value) {
+    if (node == nullptr){   //没有找到
+        return nullptr;
+    }
+
+    if (value < node->data){
+        node->left = deleteNodeHelper(node->left, value);
+    } else if (value > node->data){
+        node->right = deleteNodeHelper(node->right, value);
+    } else{
+        if (node->left && node->right){ //待删除节点有左右子节点时,使用左子树最大值代替当前待删除元素
+            T leftMax = findMaxHelper(node->left);
+            node->data = leftMax;
+            node->left = deleteNodeHelper(node->left,leftMax);
+        } else{
+            auto temp = node;   //如果待删除节点有0个或一个子节点，则令待删除节点的父节点的相应指针指向该节点的唯一子节点或者指向空
+            if (node->left){
+                node = node->left;
+            } else{
+                node = node->right;
+            }
+            delete temp;
+            temp = nullptr;
+            return node;
+        }
+    }
+    return node;
 }
 
 
