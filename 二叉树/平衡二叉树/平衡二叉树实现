@@ -1,0 +1,190 @@
+
+
+#include <iostream>
+#include <algorithm>
+
+///////////////////////// 声明 ///////////////////////////////////
+
+template<typename T>
+class Node{
+public:
+    T data;
+    Node* left;
+    Node* right;
+    int height; //节点高度
+
+    Node(const T& newData)
+        : data{newData}, left{nullptr}, right{nullptr}, height{1}{}
+};
+
+template<typename T>
+class AVLTree{
+private:
+
+    Node<T>* root;
+
+    int height(Node<T>* node);
+    int balanceFactor(Node<T>* node);
+    void updateHeight(Node<T>* node);
+    Node<T>* rotateRight(Node<T>* node);
+    Node<T>* rotateLeft(Node<T>* node);
+    Node<T>* balance(Node<T>* node);
+    Node<T>* insertHelper(Node<T>* node,const T& data);
+    Node<T>* removeHelper(Node<T>* node, const T& data);
+    void inorderHelper(Node<T>* node);
+    Node<T>* findMax(Node<T>* node);
+    Node<T>* removeMax(Node<T>* node);
+
+public:
+    AVLTree(): root{nullptr} {}
+    void insert(const T& data);
+    void remove(const T& data);
+    void inorder();
+};
+
+////////////////////////////// 实现 ///////////////////////////////
+
+template<typename T>
+int AVLTree<T>::height(Node<T> *node) {
+    return node ? node->height : 0;
+}
+
+template<typename T>
+int AVLTree<T>::balanceFactor(Node<T> *node) {
+    return node ? height(node->left) - height(node->right) : 0;
+}
+
+template<typename T>
+void AVLTree<T>::updateHeight(Node<T> *node) {
+    if (node){
+        node->height = 1 + std::max(height(node->left), height(node->right));
+    }
+}
+
+template<typename T>
+Node<T> *AVLTree<T>::rotateRight(Node<T> *node) {
+    Node<T>* newRoot = node->left;
+    node->left = newRoot->right;
+    newRoot->right = node;
+    updateHeight(node);
+    updateHeight(newRoot);
+    return newRoot;
+}
+
+template<typename T>
+Node<T> *AVLTree<T>::rotateLeft(Node<T> *node) {
+    Node<T>* newRoot = node->right;
+    node->right = newRoot->left;
+    newRoot->left = node;
+    updateHeight(node);
+    updateHeight(newRoot);
+    return newRoot;
+}
+
+template<typename T>
+Node<T> *AVLTree<T>::balance(Node<T> *node) {
+    if (!node){
+        return nullptr;
+    }
+
+    updateHeight(node);
+    int bf = balanceFactor(node);
+
+    if (bf > 1){    //不平衡情况
+        if (balanceFactor(node->left) < 0){ //LR型不平衡，先左旋node->left再右旋node
+            node->left = rotateLeft(node->left);
+        }
+        return rotateRight(node);   //LL型直接右旋
+    } else if (bf < -1){
+        if (balanceFactor(node->right) > 0){    //RL型不平衡，先右旋node->right再左旋node
+            node->right = rotateRight(node->right);
+        }
+        return rotateLeft(node); //RR型直接左旋
+    }
+    return node;
+}
+
+template<typename T>
+void AVLTree<T>::insert(const T &data) {
+    root = insertHelper(root, data);
+}
+
+template<typename T>
+Node<T> *AVLTree<T>::insertHelper(Node<T> *node, const T &data) {
+    if (!node){
+        return new Node<T>(data);
+    }
+
+    if (data < node->data){
+        node->left = insertHelper(node->left, data);
+    } else if (data > node->data){
+        node->right = insertHelper(node->right, data);
+    }
+    return balance(node);
+}
+
+template<typename T>
+Node<T> *AVLTree<T>::findMax(Node<T> *node) {
+    while (node->right){
+        node = node->right;
+    }
+    return node;
+}
+
+template<typename T>
+Node<T> *AVLTree<T>::removeMax(Node<T> *node) {
+    if (!node->right){
+        return node->left;  //不需要真正删除,后面有用
+    }
+    node->right = removeMax(node->right);
+    return balance(node);
+}
+
+template<typename T>
+void AVLTree<T>::remove(const T &data) {
+   root =  removeHelper(root, data);
+}
+
+template<typename T>
+Node<T> *AVLTree<T>::removeHelper(Node<T> *node, const T &data) {
+    if (!node){
+        return nullptr;
+    }
+
+    if (data < node->data){
+        node->left = removeHelper(node->left, data);
+    } else if (data > node->data){
+        node->right = removeHelper(node->right, data);
+    } else{
+        Node<T>* left = node->left;
+        Node<T>* right = node->right;
+        delete node;
+
+        if (!left){ //如果被删除节点的子节点数量<=1
+            return right;
+        } else if (!right){
+            return left;
+        }
+
+        Node<T>* maxLeft = findMax(left);
+        maxLeft->left = removeMax(left);    //逻辑上删除左子树上的最大节点，然后修改左子树最大节点的左指针，使其指向逻辑删除后的左子树，修改右指针使其指向当前被删除node的右子树；
+        maxLeft->right = right;                  //从而实现使用左子树上的最大节点替换当前被删除的节点。
+        return balance(maxLeft);
+    }
+}
+
+template<typename T>
+void AVLTree<T>::inorder() {
+    inorderHelper(root);
+    std::cout<<std::endl;
+}
+
+template<typename T>
+void AVLTree<T>::inorderHelper(Node<T> *node) {
+    if (node){
+        inorderHelper(node->left);
+        std::cout<<node->data<<" ";
+        inorderHelper(node->right);
+    }
+}
+
