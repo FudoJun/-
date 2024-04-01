@@ -1,0 +1,95 @@
+
+
+#include "PriorityQueque.h"
+#include <unordered_map>
+
+//////////////////////// 声明 //////////////////////////
+template<typename T>
+class HuffmanNode{
+public:
+    T data;
+    int frequency;
+    HuffmanNode* left;
+    HuffmanNode* right;
+
+    HuffmanNode(const T& newData, int freq)
+        : data{newData}, frequency{freq}, left{nullptr}, right{nullptr} {}
+};
+
+template<typename T>
+class HuffmanTree{
+private:
+    HuffmanNode<T>* root;
+
+    void generateCodesHelper(HuffmanNode<T>* node, const std::string& prefix,
+                             std::unordered_map<T, std::string>& codes);
+
+public:
+    HuffmanTree(const T* data, const int* freqs, int size);
+    ~HuffmanTree();
+    void deleteTree(HuffmanNode<T>* node);
+    HuffmanNode<T>* getRoot() const;
+    std::unordered_map<T, std::string> generateHuffmanCodes();
+};
+
+//////////////////////// 实现 //////////////////////////
+
+template<typename T>
+//使用给定数据和频率构造哈夫曼树
+HuffmanTree<T>::HuffmanTree(const T* data, const int *freqs, int size){
+    PriorityQueue<HuffmanNode<T>*> pq;
+
+    for (int i = 0; i < size; ++i) {
+        pq.enqueue(new HuffmanNode<T>(data[i],freqs[i]),freqs[i]);
+    }
+
+    //每次从队列里取最前面的2个元素构成左右子树
+    while (pq.getSize() > 1){
+        HuffmanNode<T>* left = pq.dequeue();
+        HuffmanNode<T>* right = pq.dequeue();
+        HuffmanNode<T>* parent = new HuffmanNode<T>(T(),left->frequency + right->frequency);
+        parent->left = left;
+        parent->right = right;
+        pq.enqueue(parent,parent->frequency);
+    }
+    root = pq.dequeue();
+}
+
+template<typename T>
+HuffmanTree<T>::~HuffmanTree() {
+    deleteTree(root);
+}
+
+template<typename T>
+void HuffmanTree<T>::deleteTree(HuffmanNode<T> *node) {
+    if (node){
+        deleteTree(node->left);
+        deleteTree(node->right);
+        delete node;
+    }
+}
+
+template<typename T>
+HuffmanNode<T> *HuffmanTree<T>::getRoot() const {
+    return  root;
+}
+
+template<typename T>
+std::unordered_map<T, std::string> HuffmanTree<T>::generateHuffmanCodes() {
+    std::unordered_map<T, std::string> codes;
+    if (root){
+        generateCodesHelper(root, "", codes);
+    }
+    return codes;
+}
+
+template<typename T>
+void HuffmanTree<T>::generateCodesHelper(HuffmanNode<T> *node, const std::string &prefix,
+                                         std::unordered_map<T, std::string> &codes) {
+    if (!node->left || !node->right){
+        codes[node->data] = prefix;
+    } else{
+        generateCodesHelper(node->left, prefix + "0", codes);
+        generateCodesHelper(node->right, prefix + "1", codes);
+    }
+}
