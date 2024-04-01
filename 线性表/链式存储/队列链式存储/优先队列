@@ -1,37 +1,33 @@
-//优先队列，小的在前
 
-
-#ifndef LINKEDLIST_PRIORITYQUEQUE_H
-#define LINKEDLIST_PRIORITYQUEQUE_H
 
 #include <iostream>
+#include <exception>
 
 ///////////////////////// 声明 //////////////////////////
 
-template<typename K, typename V>
+template<typename T>
 class Node{
 public:
-    K key;
-    V value;
+    T data;
+    int priority;
     Node* next;
 
-    Node(const V& v = V(), const K& k = K())
-        : key{k}, value{v}, next{nullptr} {}
-
+    Node(const T& newData,int p)
+        : data{newData}, priority{p}, next{nullptr}{}
 };
 
-template<typename K, typename V>
+template<typename T>
 class PriorityQueue{
 private:
-    Node<K,V>* front;
+    Node<T>* front;
     //Node<K,V>* rear;
 
 public:
     PriorityQueue() : front{nullptr} {}
     ~PriorityQueue();
 
-    void enqueue(const V& value, const K& key = K());   //不传K的时候使用默认值，主要用于构建哈夫曼树的根节点
-    Node<K,V> dequeue();
+    void enqueue(const T& value, int priority);
+    T dequeue();
     bool isEmpty() const;
     void printQueue() const;
 
@@ -39,29 +35,30 @@ public:
 
 ///////////////////////// 实现 //////////////////////////
 
-template<typename K, typename V>
-PriorityQueue<K,V>::~PriorityQueue() {
+template<typename T>
+PriorityQueue<T>::~PriorityQueue() {
     while (front){
-        Node<K,V>* temp = front;
+        Node<T>* temp = front;
         front = front->next;
         delete temp;
+        temp = nullptr;
     }
 }
 
-template<typename K, typename V>
-bool PriorityQueue<K, V>::isEmpty() const {
+template<typename T>
+bool PriorityQueue<T>::isEmpty() const {
     return front == nullptr;
 }
 
-template<typename K, typename V>
-void PriorityQueue<K, V>::enqueue(const V& value, const K& key) {
-    Node<K,V>* newNode = new Node<K,V>(value,key);
-    if (!front || value < front->value){
+template<typename T>
+void PriorityQueue<T>::enqueue(const T &value, int priority) {
+    Node<T>* newNode = new Node<T>(value, priority);
+    if (!front || priority < front->priority){
         newNode->next = front;
         front = newNode;
     } else{
-        Node<K,V>* current = front;
-        while (current->next && current->next->value <= value){
+        Node<T>* current = front;
+        while (current->next && current->next->priority <= priority){
             current = current->next;
         }
         newNode->next = current->next;
@@ -69,28 +66,27 @@ void PriorityQueue<K, V>::enqueue(const V& value, const K& key) {
     }
 }
 
-template<typename K, typename V>
-Node<K, V> PriorityQueue<K, V>::dequeue() {
+template<typename T>
+T PriorityQueue<T>::dequeue() {
     if (isEmpty()){
-        std::cerr<<"Queue is empty."<<std::endl;
-        return Node<K,V>();
+        throw std::out_of_range("PriorityQueue is empty.");
     }
-    Node<K,V> tempObj = *front;
-    Node<K,V>* temp = front;
+    Node<T>* temp = front;
+    T data = front->data;
     front = front->next;
     delete temp;
-    return tempObj;
+    temp = nullptr;
+    return data;
 }
 
-template<typename K,typename V>
-void PriorityQueue<K, V>::printQueue() const {
-    Node<K,V>* current = front;
-    std::cout<<"<<<| ";
+template<typename T>
+void PriorityQueue<T>::printQueue() const {
+    Node<T>* current = front;
+    std::cout<< "<<<| ";
     while (current){
-        std::cout<<current->key<<" ";
+        std::cout<<current->priority<<" ";
         current = current->next;
     }
-    std::cout<<" |<<<"<<std::endl;
+    std::cout<< " |<<<";
 }
 
-#endif //LINKEDLIST_PRIORITYQUEQUE_H
