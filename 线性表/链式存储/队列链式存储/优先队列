@@ -1,5 +1,4 @@
 
-
 #include <iostream>
 #include <exception>
 
@@ -20,7 +19,7 @@ template<typename T>
 class PriorityQueue{
 private:
     Node<T>* front;
-    //Node<K,V>* rear;
+    int size{0};
 
 public:
     PriorityQueue() : front{nullptr} {}
@@ -30,6 +29,7 @@ public:
     T dequeue();
     bool isEmpty() const;
     void printQueue() const;
+    int getSize() const;
 
 };
 
@@ -51,6 +51,7 @@ bool PriorityQueue<T>::isEmpty() const {
 }
 
 template<typename T>
+//小的在前，大的在后
 void PriorityQueue<T>::enqueue(const T &value, int priority) {
     Node<T>* newNode = new Node<T>(value, priority);
     if (!front || priority < front->priority){
@@ -64,6 +65,7 @@ void PriorityQueue<T>::enqueue(const T &value, int priority) {
         newNode->next = current->next;
         current->next = newNode;
     }
+    size++;
 }
 
 template<typename T>
@@ -76,6 +78,7 @@ T PriorityQueue<T>::dequeue() {
     front = front->next;
     delete temp;
     temp = nullptr;
+    size--;
     return data;
 }
 
@@ -90,3 +93,7 @@ void PriorityQueue<T>::printQueue() const {
     std::cout<< " |<<<";
 }
 
+template<typename T>
+int PriorityQueue<T>::getSize() const {
+    return size;
+}
