@@ -1,0 +1,61 @@
+
+//如果某个hash表节点的链表太长时，查找会退化成链式查找，因此太多数据的情况下应该使用红黑树或者跳表作为节点的链.
+
+/////////////////// 声明 /////////////////////////
+
+#include "DoublyLinkedList.h"
+
+template<typename K>
+class HashTable{
+private:
+    DoublyLinkedList<K>* m_table;
+    int m_capacity;
+    int hashFunction(const K& key);
+
+public:
+    HashTable(int capacity) : m_capacity{capacity}{
+        m_table = new DoublyLinkedList<K>[capacity];
+    }
+    ~HashTable(){
+        delete[] m_table;
+    }
+
+    void insert(const K& key);
+    void find(const K& key);
+    void remove(const K& key);
+    void printTable() const;
+};
+
+template<typename K>
+int HashTable<K>::hashFunction(const K &key) {
+    return key % m_capacity;
+}
+
+/////////////////// 实现 /////////////////////////
+
+template<typename K>
+void HashTable<K>::insert(const K &key) {
+    int index = hashFunction(key);
+    m_table[index].append(key);
+}
+
+template<typename K>
+void HashTable<K>::find(const K &key) {
+    int index = hashFunction(key);
+    m_table[index].locateNodeWithValue(key);
+}
+
+template<typename K>
+void HashTable<K>::remove(const K &key) {
+    int index = hashFunction(key);
+    m_table[index].deleteNode(key);
+}
+
+template<typename K>
+void HashTable<K>::printTable() const {
+    for (int i = 0; i < m_capacity; ++i) {
+        m_table[i].printForward();
+        std::cout<<std::endl;
+    }
+}
+
