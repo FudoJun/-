@@ -1,0 +1,145 @@
+#pragma once
+
+#include <iostream>
+#include <string>
+#include <optional>
+
+////////////////////// 声明 ////////////////////////
+
+template<typename K, typename V>
+class HashNode
+{
+public:
+    K key;
+    V value;
+    bool occupied; //标记是否占用
+    bool deleted; //标记是否有过被删除元素
+
+    HashNode() : occupied{false}, deleted{false} {}
+
+};
+
+template<typename K, typename V>
+class HashTable{
+private:
+    HashNode<K,V>* table;
+    int capacity;
+    int size;
+
+    //计算哈希值
+
+    int hashFunction(const K& key);
+
+public:
+    HashTable(int capacity) : capacity{capacity}, size{0}
+    {
+        table = new HashNode<K,V>[capacity];
+    }
+
+    ~HashTable()
+    {
+        delete[] table;
+    }
+
+    void insert(const K& key, const V& value);
+    std::optional<V> find(const K& key);
+    void remove(const K& key);
+    int getSize() const;
+    void printTable() const;
+};
+
+////////////////////// 实现 ////////////////////////
+
+template<typename K, typename V>
+int HashTable<K,V>::hashFunction(const K& key){
+    return key % capacity;
+}
+
+template<typename K, typename V>
+void HashTable<K,V>::insert(const K& key, const V& value){
+    int index = hashFunction(key);
+
+    if (size == capacity)
+    {
+        std::cout<<"Table is full."<<std::endl;
+        return;
+    }
+    
+    while (table[index].occupied)
+    {
+        index = (index + 1) % capacity;
+    }
+    
+    table[index].key = key;
+    table[index].value = value;
+    table[index].occupied = true;
+    table[index].deleted = false; 
+    size++;
+}
+
+template<typename K, typename V>
+std::optional<V> HashTable<K,V>::find(const K& key){
+    int index = hashFunction(key);
+    int count = 0;
+
+    //值不为空或者当前值被删除过的情况下，继续往后找
+    while (table[index].occupied || table[index].deleted)   
+    {
+        if (table[index].occupied && table[index].key == key)
+        {
+            return table[index].value;
+        }
+        index = (index + 1) % capacity;
+        count++;
+        if (count > capacity)   //如果转了一圈都没找到
+        {
+            return std::nullopt; 
+        } 
+    }
+    return std::nullopt; 
+}
+
+template<typename K, typename V>
+void HashTable<K,V>::remove(const K& key){
+    int index = hashFunction(key);
+    int count = 0;
+
+    while (table[index].occupied || table[index].deleted)
+    {
+        if (table[index].key == key)
+        {
+            table[index].occupied = false;
+            table[index].deleted = true;
+            size--;
+            return;
+        }
+        
+        index = (index + 1) % capacity;
+
+        count++;
+        if (count > capacity)
+        {
+            std::cout<<"Delete failed."<<std::endl;
+            return;
+        }
+    }    
+}
+
+template<typename K, typename V>
+int HashTable<K,V>::getSize() const{
+    return size;
+}
+
+template<typename K, typename V>
+void HashTable<K,V>::printTable() const{
+
+    for (size_t i = 0; i < capacity; i++)
+    {
+        if (table[i].occupied)
+        {
+            std::cout<<table[i].key<<" "<<table[i].value<<" ";
+        }
+    }
+    std::cout<<std::endl;
+    
+}
