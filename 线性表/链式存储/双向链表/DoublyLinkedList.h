@@ -38,10 +38,13 @@ public:
     void printForward() const;
     void printBackward() const;
     void deleteNode(std::optional<size_t> index=std::nullopt);
+    void deleteNode(const T& value);
     void insertNode(size_t index,const T& newData);
     void locateNode(size_t index);
+    void locateNodeWithValue(const T& value);
     void modifyNode(size_t index,const T& newData);
-
+    Node<T>* getHead() const;
+    Node<T>* getTail() const;
 };
 
 //////////////////////////////////////////////////////
@@ -86,7 +89,7 @@ void DoublyLinkedList<T>::printForward() const
     Node<T>* current = head;
     while (current != nullptr)
     {
-        std::cout<<current->data<<" "<<std::endl;
+        std::cout<<current->data<<" ";
         current=current->next;
     }
 }
@@ -169,6 +172,29 @@ void DoublyLinkedList<T>::deleteNode(std::optional<size_t> index)
 }
 
 template<typename T>
+void DoublyLinkedList<T>::deleteNode(const T &value) {
+    if (!head){
+        std::cout<<"List is empty."<<std::endl;
+        return;
+    }
+    Node<T>* current = head;
+    while (current){
+        if (current->data == value){
+            current->prev->next = current->next;
+            if (current != tail){
+                current->next->prev = current->prev;    //尾节点的next为nullpt,因此没有prev
+            }
+            delete current;
+            current = nullptr;
+            std::cout<<"The element with value : "<<value<<" has been deleted."<<std::endl;
+            return;
+        }
+        current = current->next;
+    }
+    std::cout<<"The element with value : "<<value<<" are not in the list."<<std::endl;
+}
+
+template<typename T>
 void DoublyLinkedList<T>::insertNode(size_t index,const T& newData)
 {
     if (index == 0)
@@ -230,6 +256,26 @@ void DoublyLinkedList<T>::locateNode(size_t index)
 }
 
 template<typename T>
+void DoublyLinkedList<T>::locateNodeWithValue(const T &value)
+{
+    size_t count{};
+    Node<T>* current = head;
+    while (current){
+        if (current->data == value)
+        {
+            std::cout<<"Index of element of value: "
+                <<value<<" is : "<<count<<std::endl;
+            return;
+        }
+        count++;
+        current = current->next;
+    }
+    std::cout<<"Index of element of value: "
+             <<value<<" not found. "<<std::endl;
+    return;
+}
+
+template<typename T>
 void DoublyLinkedList<T>::modifyNode(size_t index,const T& newData)
 {
     if (index >= m_count)
@@ -250,6 +296,16 @@ void DoublyLinkedList<T>::modifyNode(size_t index,const T& newData)
         }
         current = current->next;
     }
+}
+
+template<typename T>
+Node<T> *DoublyLinkedList<T>::getHead() const {
+    return head;
+}
+
+template<typename T>
+Node<T> *DoublyLinkedList<T>::getTail() const {
+    return tail;
 }
 
 #endif
