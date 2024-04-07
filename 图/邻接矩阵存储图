@@ -1,0 +1,83 @@
+
+#include <iostream>
+#include <vector>
+
+/////////////////////////// 声明 ////////////////////////////
+
+template<typename T>
+class DirectedGraph{
+private:
+    int size;   //顶点数量
+    int vertexCount{};
+    int edgeCount{};
+    std::vector<T> vertex;
+    std::vector<std::vector<int>> adjacencyMatrix;
+
+    bool isInVector(const std::vector<T>& vec, const T& vertex);
+
+public:
+    DirectedGraph(int n)
+        : size{n}, vertex(n), adjacencyMatrix(n,std::vector<int>(n, 0)) {}
+
+    void addVertex(const T& value);
+    void addEdge(int from, int to);
+    void printMatrix();
+
+};
+
+/////////////////////////// 实现 ////////////////////////////
+
+template<typename T>
+void DirectedGraph<T>::addVertex(const T &value) {
+    if (isInVector(vertex,value) == false){ //顶点不在vector中则插入顶点
+        vertex[vertexCount++] = value;
+        std::cout<<"Vertex " << value << " added." << std::endl;
+    }
+}
+
+template<typename T>
+void DirectedGraph<T>::addEdge(int from, int to) {
+    if (from < 0 || from >= size || to < 0 || to >= size){
+        std::cerr<<"Invalid vertex index!"<<std::endl;
+        return;
+    } else if (adjacencyMatrix[from][to] == 0){ //如果插入的边不存在，则插入，否则什么都不做
+        adjacencyMatrix[from][to] = 1;
+        edgeCount++;
+    }
+}
+
+//假设顶点类型为char时可以使用如下：
+/* template<typename T>
+void DirectedGraph<T>::printMatrix() {                                                        
+    for (int i = -1; i < vertexCount; ++i) {
+        for (int j = -1; j < vertexCount; ++j) {
+            if (j == -1){
+                if (i == -1){
+                    std::cout<<"   ";
+                } else{
+                    std::cout<<" "<<static_cast<char>(vertex[i])<<" "; 
+                }
+            } else if (i == -1){
+                std::cout<<" "<<static_cast<char>(vertex[j])<<" ";
+            } else{
+                std::cout<<" "<<adjacencyMatrix[i][j]<<" ";
+            }
+        }
+        std::cout<<std::endl;
+    }
+} */
+
+template<typename T>
+void DirectedGraph<T>::printMatrix() {
+    for (int i = 0; i < vertexCount; ++i) {
+        for (int j = 0; j < vertexCount; ++j) {
+            std::cout<<adjacencyMatrix[i][j]<<" ";
+        }
+        std::cout<<std::endl;
+    }
+}
+
+template<typename T>
+bool DirectedGraph<T>::isInVector(const std::vector<T> &vec, const T &vertex) {
+    return std::find(vec.begin(), vec.end(),vertex) != vec.end();  //判断元素是否在vector中
+}
