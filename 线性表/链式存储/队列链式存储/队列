@@ -68,6 +68,10 @@ std::optional<T> Queue<T>::dequeque() {
     }
     T value = front->data;
     Node<T>* temp = front;
+    if (front == rear){
+        front = front->next;
+        rear = rear->next;
+    }
     front = front->next;
     delete temp;
     temp = nullptr;
