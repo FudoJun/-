@@ -22,11 +22,17 @@ private:
     int vertexCount{};
     int edgeCount{};
     bool isInVector(const T& vertexData);
+    bool dfsHelper(int from, int to, std::vector<int>& visited, Node<int>* node);
 
 public:
     void addVertex(const T& vertexData);
     void addEdge(int from, int to);
     void printGraph();
+    // 从起始节点开始，沿着一条路径尽可能深地搜索，直到达到最深的节点，
+    // 然后回溯到前一个节点，继续沿着另一条路径搜索，直到遍历完所有路径。
+    // 使用栈或者递归实现
+    bool dfs(int from, int to);
+
 };
 
 ///////////////////////// 实现 ///////////////////////////
@@ -71,6 +77,35 @@ bool DirectedGraph<T>::isInVector(const T &vertexData) {
         if (i->Vertex == vertexData){
             return true;
         }
+    }
+    return false;
+}
+
+template<typename T>
+bool DirectedGraph<T>::dfs(int from, int to) {
+    std::vector<int> visited(vertexCount,0);
+    if (from < 0 || from >= vertexCount || to < 0 || to >= vertexCount){
+        std::cerr<<"Invalid vertex index."<<std::endl;
+        return false;
+    }
+    Node<int>* node = vertex[from]->edge.getHead();
+    return dfsHelper(from,to,visited,node);
+}
+
+template<typename T>
+bool DirectedGraph<T>::dfsHelper(int from, int to, std::vector<int> &visited, Node<int>* node) {
+    visited[from] = 1;
+    std::cout<<vertex[from]->Vertex<<" -> ";
+    if (from == to){    //此处使用索引判断是否找到目标节点，也可使用实际存储的数据判断，如 vertex[from]->Vertex == vertex[to]->Vertex
+        return true;
+    }
+    while (node){
+        if (visited[node->data] != 1){
+            if (dfsHelper(node->data, to, visited, vertex[node->data]->edge.getHead())){
+                return true;
+            }
+        }
+        node = node->next;
     }
     return false;
 }
