@@ -2,6 +2,7 @@
 #include <iostream>
 #include <vector>
 #include "DoublyLInkedList.h"
+#include "Queue.h"
 
 ///////////////////////// 声明 ///////////////////////////
 
@@ -23,6 +24,7 @@ private:
     int edgeCount{};
     bool isInVector(const T& vertexData);
     bool dfsHelper(int from, int to, std::vector<int>& visited, Node<int>* node);
+    bool bfsHelper(int from, int to, std::vector<int>& visited, Queue<Node<int>*>& queue);
 
 public:
     void addVertex(const T& vertexData);
@@ -33,6 +35,10 @@ public:
     // 使用栈或者递归实现
     bool dfs(int from, int to);
 
+    // 从起始节点开始，依次访问起始节点的邻居节点，然后访问邻居节点的邻居节点，
+    // 依此类推，直到遍历完所有与起始节点直接或间接相连的节点。
+    // 使用队列实现。
+    bool bfs(int from, int to);
 };
 
 ///////////////////////// 实现 ///////////////////////////
@@ -106,6 +112,40 @@ bool DirectedGraph<T>::dfsHelper(int from, int to, std::vector<int> &visited, No
             }
         }
         node = node->next;
+    }
+    return false;
+}
+
+template<typename T>
+bool DirectedGraph<T>::bfs(int from, int to) {
+    if (from < 0 || from >= vertexCount || to < 0 || to >= vertexCount){
+        std::cerr<<"Invalid vertex index."<<std::endl;
+        return false;
+    }
+    std::vector<int> visited(vertexCount,0);
+    Queue<Node<int>*> queue;
+
+    return bfsHelper(from, to, visited, queue);
+}
+
+template<typename T>
+bool DirectedGraph<T>::bfsHelper(int from, int to, std::vector<int> &visited, Queue<Node<int>*>& queue) {
+    queue.enqueue(vertex[from]->edge.getHead());
+    visited[from] = 1;
+    std::cout<<vertex[from]->Vertex<<" -> ";
+    while (!queue.isEmpty()){
+        auto qNode = queue.dequeque().value();
+        if (visited[to] == 1){
+            return true;
+        }
+        while (qNode){
+            std::cout<<vertex[qNode->data]->Vertex<<" -> ";
+            if (visited[qNode->data] != 1){
+                queue.enqueue(vertex[qNode->data]->edge.getHead());
+                visited[qNode->data] = 1;
+            }
+            qNode = qNode->next;
+        }
     }
     return false;
 }
