@@ -71,6 +71,8 @@ std::optional<T> Queue<T>::dequeque() {
     if (front == rear){
         front = front->next;
         rear = rear->next;
+    }else{
+        front = front->next;
     }
     front = front->next;
     delete temp;
