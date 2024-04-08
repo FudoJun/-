@@ -75,7 +75,12 @@ T PriorityQueue<T>::dequeue() {
     }
     Node<T>* temp = front;
     T data = front->data;
-    front = front->next;
+    if (front == rear){
+        front = front->next;
+        rear = rear->next;
+    }else{
+        front = front->next;
+    }
     delete temp;
     temp = nullptr;
     size--;
