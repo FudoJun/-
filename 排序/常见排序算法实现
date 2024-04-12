@@ -1,0 +1,321 @@
+
+#include <iostream>
+
+////////////////////// 声明 /////////////////////////
+template<typename T>
+void bubbleSort(T* arr, int size);
+
+template<typename T>
+void insertSort(T* arr, int size);
+
+template<typename T>
+void selectSort(T* arr, int size);
+
+template<typename T>
+void shellSort(T* arr, int size);
+
+template<typename T>
+void heapSort(T* arr, int size);
+
+template<typename T>
+void makeHeap(T* arr, int start, int end);
+
+template<typename T>
+void quickSort(T* arr, int size);
+
+template<typename T>
+void quickSortHelper(T* arr, int low, int high);
+
+template<typename T>
+void dualPivotQuickSort(T* arr, int size);
+
+template<typename T>
+void dualPivotQuickSortHelper(T* arr, int low, int high);
+
+template<typename T>
+int partition(T* arr, int low, int high);
+
+template<typename T>
+void printArray(T* arr, int size);
+
+template<typename T>
+int binarySearch(T* arr, int left, int right, T target);
+
+template<typename T>
+void swap(T& a, T& b);
+
+////////////////////// 实现 /////////////////////////
+
+//冒泡排序
+template<typename T>
+void bubbleSort(T* arr, int size){
+    // 仅需要size-1轮循环，因为每轮外层循环中，找到一个最大元素，
+    // 而当执行完size-1次后，最后一个未排序元素一定是最小的
+    for (int i = 0; i < size - 1; ++i) {
+
+        // 默认数组有序，当一轮比较中未发生交换时，说明数组有序，直接中断寻循环来优化算法效率
+        bool flag = 1;
+
+        // size-1在内层循环中可控制下标不越界，-i则是因为不需要对已排序元素进行比较
+        for (int j = 0; j < size - 1 - i; ++j) {
+            if (arr[j] > arr[j+1]){
+                flag = 0;
+                swap(arr[j],arr[j+1]);
+            }
+        }
+        if (flag){
+            break;
+        }
+    }
+}
+
+// 原版插入排序
+//template<typename T>
+//void insertSort(T* arr, int size){
+//    // 默认第一个元素有序，因此从第二个元素开始循环
+//    for (int i = 1; i < size; ++i) {
+//        T temp = arr[i];
+//        int j = i;
+//        //从插入位置开始后移
+//        while (j > 0 && arr[j-1] > temp){
+//            arr[j] = arr[j-1];
+//            j--;
+//        }
+//        arr[j] = temp;
+//    }
+//}
+
+// 优化后的插入排序，从已排序的元素中，使用二分查找来快速获得当前元素应该插入的位置
+template<typename T>
+void insertSort(T* arr, int size){
+    for (int i = 1; i < size; ++i) {
+        T temp = arr[i];
+        int j = binarySearch(arr,0,i-1,temp);
+        for (int k = i; k > j; k--) {
+            arr[k] = arr[k - 1];
+        }
+        arr[j] = temp;
+    }
+}
+
+// 原版选择排序
+// 每次选择最小的放在前面
+//template<typename T>
+//void selectSort(T* arr, int size){
+//    //当size-1个元素排序完后，剩下最后一个一定是最大的
+//    for (int i = 0; i < size - 1; ++i) {
+//        int min = i;
+//        for (int j = i + 1; j < size; ++j) {
+//            if (arr[j] < arr[min]){
+//                min = j;
+//            }
+//        }
+//        swap(arr[i],arr[min]);
+//    }
+//}
+
+//改进的选择排序算法
+template<typename T>
+void selectSort(T* arr, int size){
+    int left = 0;
+    int right = size-1;
+
+    while (left < right){
+        int min = left;
+        int max = right;
+        //每次选择一个最大的和最小的，并放在数组2边
+        for (int i = left; i <= right; ++i) {
+            if (arr[i] < arr[min]){
+                min = i;
+            }
+            if (arr[i] > arr[max]){
+                max = i;
+            }
+        }
+        swap(arr[max],arr[right]);
+        //如果right指向的元素恰好是min指向的元素时，
+        //将min指向交换后的max，此时arr[max]为交换后的arr[right]，即arr[min],
+        //通过此操作更改min，使其指向正确位置，防止将当前最大元素交换到前面
+        if (right == min){
+            min = max;
+        }
+        swap(arr[min], arr[left]);
+        //缩小排序范围
+        left++;
+        right--;
+    }
+}
+
+//希尔排序，对插入排序的改进
+template<typename T>
+void shellSort(T* arr, int size){
+    //如果数组长度为奇数，那么最后一个分组的元素会比其他分组多一个，
+    //delta等于1时，算法退化成插入排序
+    int delta = size / 2;
+    while (delta >= 1){
+        for (int i = delta; i < size; ++i) {
+            int j = i;
+            T temp = arr[i];
+            //j >= delta用于判断当前元素是否是该分组第一个，
+            //如果当前j指向该分组第二个元素时，那么如果执行交换，则会将该分组第一个元素复制到j当前指向的位置，
+            //此时交换完成后，再执行j -= delta，则j指向当前分组的第一个元素，且此时j，即第一个元素的下标必然小于delta，
+            //那么当前分组中，最小的元素必然会被交换到第一个位置。例如数组长度为11时，delta = 5, 最后一个分组的j = （0,5,10）时。
+            while (j >= delta && arr[j-delta] > temp){
+                arr[j] = arr[j-delta];
+                j -= delta;
+            }
+            arr[j] = temp;
+        }
+        delta /= 2;
+    }
+}
+
+template<typename T>
+void heapSort(T* arr, int size){
+    //由于数组从0开始，所以需要size/2-1来找到最后一个非叶子节点，再从后往前堆化
+    for (int i = size / 2 - 1; i >= 0; --i) {
+        //传入size-1判断叶子节点是否超出数组范围
+        makeHeap(arr, i, size - 1);
+    }
+    //从后往前和第一个堆顶元素交换，大根堆顶部元素为当前最大值
+    for (int i = size - 1; i > 0; --i) {
+        swap(arr[0],arr[i]);
+        //这里只能传入i-1而不是i--，否则会出现待交换位置被跳过
+        makeHeap(arr, 0, i - 1);
+    }
+}
+
+template<typename T>
+void makeHeap(T* arr, int start, int end){
+    //由于下标从0开始，所以需要额外+1寻找到左子结点,
+    //如果有子节点
+    while (start * 2 + 1 <= end){
+        //start位置为当前根节点
+        //child默认左子结点
+        int child = start * 2 + 1;
+        //如果存在右子结点,且右子结点大于左子结点，则直接比较右子结点和根节点大小
+        if (child + 1 <= end && arr[child + 1] > arr[child]){
+            child++;
+        }
+        //如果子结点大于根节点，则交换
+        if (arr[child] > arr[start]){
+            swap(arr[child], arr[start]);
+        }
+        //进入到子结点进行相同操作，直到所有子树都满足大根堆
+        start = child;
+    }
+}
+
+//快速排序
+//当整个数组都是倒序时，每次快速排序只能选择一个当前最大的或最小的排在相应位置，这种情况下会退化成选择排序
+template<typename T>
+void quickSort(T* arr, int size){
+    quickSortHelper(arr, 0, size-1);
+}
+
+template<typename T>
+void quickSortHelper(T* arr, int low, int high){
+    if (low >= high){
+        return;
+    }
+    int pos = partition(arr, low, high);
+    quickSortHelper(arr, low, pos-1);
+    quickSortHelper(arr, pos+1, high);
+}
+
+template<typename T>
+int partition(T* arr, int low, int high){
+    T pivot = arr[low];
+    while (low < high){
+        while (low < high && arr[high] > pivot){
+            high--;
+        }
+        arr[low] = arr[high];
+        while (low < high && arr[low] < pivot){
+            low++;
+        }
+        arr[high] = arr[low];
+    }
+    arr[low] = pivot;
+    return low;
+}
+
+//双轴快排，对快速排序进行改进
+template<typename T>
+void dualPivotQuickSort(T* arr, int size){
+    dualPivotQuickSortHelper(arr, 0, size-1);
+}
+
+template<typename T>
+void dualPivotQuickSortHelper(T* arr, int low, int high){
+    if (low >= high){
+        return;
+    }
+    //确保大的中轴在后面
+    if (arr[low] > arr[high]){
+        swap(arr[low],arr[high]);
+    }
+
+    int pivot1 = arr[low];
+    int pivot2 = arr[high];
+
+    //使用3个标志位划分数组
+    int left = low;
+    int mid = left + 1;
+    int right = high;
+
+    //mid到right之间的元素为待排序元素
+    while (mid < right){
+        if (arr[mid] < pivot1){
+            //交换规则，先移动left，再交换，再移动mid
+            swap(arr[++left],arr[mid++]);
+        }else if (arr[mid] <= pivot2){
+            mid++;  //本身大小就处于2个pivot元素中间，只移动标志位
+        } else{
+            //arr[mid]大于pivot2时
+            //左移right标志位，直到找到小于pivot2的元素再交换
+            while (arr[--right] > pivot2 && mid < right);
+            if (mid >= right){
+                break;
+            }
+            swap(arr[mid],arr[right]);
+        }
+    }
+    //交换后，将剩余元素分为3个待排序区间
+    swap(arr[low],arr[left]);
+    swap(arr[high],arr[right]);
+
+    quickSortHelper(arr,low,left-1);
+    quickSortHelper(arr,left+1,right-1);
+    quickSortHelper(arr,right+1,high);
+}
+
+template<typename T>
+int binarySearch(T* arr, int left, int right, T target){
+    while (left <= right){
+        int mid = (left + right) / 2;
+        if (arr[mid] == target){
+            return mid + 1;
+        } else if (arr[mid] < target){
+            left = mid + 1;
+        } else if (arr[mid] > target){
+            right = mid - 1;
+        }
+    }
+    return left;
+}
+
+template<typename T>
+void printArray(T* arr, int size) {
+    for (int i = 0; i < size; ++i) {
+        std::cout << arr[i] << " ";
+    }
+    std::cout << std::endl;
+}
+
+template<typename T>
+void swap(T& a, T& b){
+    T temp = a;
+    a = b;
+    b = temp;
+}
